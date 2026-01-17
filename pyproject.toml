@@ -1,0 +1,227 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+
+[project]
+name = "qentity"
+description = "Typed entity abstractions and ORM-like utilities for Qdrant"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Vlad Adumitracesei", email = "vladadumitracesei@gmail.com"},
+    {name = "Rares Istoc", email = "istoc.rares@gmail.com"}
+]
+keywords = ["qdrant", "orm", "vector-database", "entity", "typed"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "qdrant-client>=1.7.0",
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.6.0",
+    "fastembed>=0.7.4",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/cube-digital/qentity"
+Documentation = "https://qentity.readthedocs.io"
+Changelog = "https://github.com/cube-digital/qentity/blob/main/CHANGELOG.md"
+"Source Code" = "https://github.com/cube-digital/qentity"
+"Issue Tracker" = "https://github.com/cube-digital/qentity/issues"
+
+[project.optional-dependencies]
+# Async support
+asyncio = ["anyio>=4.0.0"]
+
+# Type checking extras
+mypy = [
+    "mypy>=1.5.0",
+]
+
+# Documentation
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+    "sphinx-autodoc-typehints>=1.24.0",
+]
+
+# Development groups moved to dependency-groups below
+
+
+[dependency-groups]
+# Modern PEP 735 dependency groups for development
+tests = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-xdist>=3.3.0",
+    "hypothesis>=6.82.0",
+]
+
+lint = [
+    "ruff>=0.1.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+    "qentity[mypy]",
+]
+
+dev = [
+    {include-group = "tests"},
+    {include-group = "lint"},
+    "qentity[asyncio]",
+    "ipython>=8.0.0",
+    "ipdb>=0.13.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["qentity"]
+
+[tool.hatch.version]
+path = "qentity/__init__.py"
+
+
+# Testing configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "--tb=native",
+    "-v",
+    "-r sfxX",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=qentity",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+pythonpath = ["."]
+python_files = "test_*.py"
+norecursedirs = [".*", "build", "dist", "*.egg", "__pycache__"]
+markers = [
+    "asyncio: mark test as async",
+    "slow: mark test as slow running",
+    "integration: mark test as integration test requiring external services",
+]
+filterwarnings = [
+    "error::DeprecationWarning:qentity",
+]
+
+[tool.coverage.run]
+source = ["qentity"]
+branch = true
+parallel = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.paths]
+source = ["qentity/"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+    "\\.\\.\\.",
+]
+
+# Linting and formatting
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "S",   # flake8-bandit
+    "RUF", # ruff-specific rules
+    "ANN", # flake8-annotations
+    "ASYNC", # flake8-async
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # function calls in argument defaults
+    "S101",  # use of assert
+    "ANN101", # missing type annotation for self
+    "ANN102", # missing type annotation for cls
+]
+
+[tool.ruff.per-file-ignores]
+"tests/**/*.py" = ["S101", "S105", "S106", "ANN"]
+"**/__init__.py" = ["F401"]
+
+[tool.ruff.isort]
+known-first-party = ["qentity"]
+
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312", "py313"]
+include = '\.pyi?$'
+
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+pretty = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "qdrant_client.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+
+# Disable isort (we use ruff for import sorting)
+[tool.isort]
+skip_glob = ["*"]
